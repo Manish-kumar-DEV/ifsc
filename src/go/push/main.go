@@ -28,8 +28,39 @@ func main() {
 	}
 	populateMap(cols1, m)
 
+	file1, ferror := excelize.OpenFile("src/RTGEB0815.xlsx")
+	if ferror != nil {
+		log.Fatal(ferror)
+	}
+
+	cols2, _ := file1.GetCols("RTGS Branches (A-H)")
+	populateMap(cols2, m)
+
+	cols3, _ := file1.GetCols("RTGS Branches (I-R)")
+	populateMap(cols3, m)
+
+	cols4, _ := file1.GetCols("RTGS Branches (S-Z)")
+	populateMap(cols4, m)
+
+	for key, value := range m {
+		value = unique(value)
+		m[key] = value
+	}
+
 	marshal, _ := json.Marshal(m)
 	ioutil.WriteFile("IFSC.json", marshal, os.ModePerm)
+}
+
+func unique(s []interface{}) []interface{} {
+	inResult := make(map[interface{}]bool)
+	var result []interface{}
+	for _, str := range s {
+		if _, ok := inResult[str]; !ok {
+			inResult[str] = true
+			result = append(result, str)
+		}
+	}
+	return result
 }
 
 func populateMap(cols [][]string, m map[string][]interface{}) {
